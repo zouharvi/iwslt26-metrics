@@ -10,9 +10,10 @@ pip3 install -r requirements
 
 We include several baselines. The format for a submission is a list of numbers with the same length as the input JSONL file.
 ```bash
-mkdir data/output/
-python3 baselines -i data/wmt25.jsonl -m asr_comet -o data/output/wmt25_comet.jsonl
-python3 baselines -i data/wmt25.jsonl -m asr_comet_partial -o data/output/wmt25_comet_partial.jsonl
+mkdir -p data/output/ data/iwslt26/
+python3 scripts/04-hf_to_jsonl.py
+python3 baselines -i data/iwslt26/dev.jsonl -m asr_comet -o data/output/iwslt26dev_comet.jsonl
+python3 baselines -i data/iwslt26/dev.jsonl -m asr_comet_partial -o data/output/iwslt26dev_comet_partial.jsonl
 ```
 
 ## Meta-evaluation
@@ -20,10 +21,17 @@ python3 baselines -i data/wmt25.jsonl -m asr_comet_partial -o data/output/wmt25_
 To evaluate the output of automated metrics, pass it in `-m` to the following script.
 
 ```bash
-python3 evaluation -i data/wmt25.jsonl -m data/output/*.jsonl
+python3 evaluation -i data/iwslt26/dev.jsonl -m data/output/iwslt26dev_*.jsonl
 ```
 
-The results for baselines (WMT25) are:
+The results for baselines (IWSLT26 dev) are:
 ```
-WIP
+SEGMENT-LEVEL
+      iwslt26dev_comet_partial: 11.6% | ende:11.3% enzh:12.0%
+              iwslt26dev_comet: 34.6% | ende:32.6% enzh:36.5%
+
+
+SYSTEM-LEVEL
+      iwslt26dev_comet_partial: 56.6% | ende:44.4% enzh:68.7%
+              iwslt26dev_comet: 89.4% | ende:86.2% enzh:92.6%
 ```

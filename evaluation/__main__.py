@@ -2,6 +2,7 @@ import argparse
 import collections
 import json
 import statistics
+import numpy as np
 import scipy.stats
 import subset2evaluate.evaluate
 
@@ -37,14 +38,17 @@ def segment_level(data_lang):
     docs = collections.defaultdict(list)
     for line in data_lang:
         docs[line["doc_id"]].append(line)
-    return statistics.mean([
+    
+    corrs = [
         scipy.stats.kendalltau(
             [line["score"] for line in doc],
             [line["score_pred"] for line in doc],
             variant="b",
         ).correlation
         for doc in docs.values()
-    ])
+        if len(doc) >= 2
+    ]
+    return statistics.mean([x for x in corrs if not np.isnan(x)])
 
 # system-level
 def system_level(data_lang):
@@ -64,11 +68,17 @@ def system_level(data_lang):
         }
         for doc in data_coll.values()
     ]
+    # take rows that have all systems
     # systems that are everywhere
-    systems = set.intersection(*[
+    systems = set.union(*[
         set(doc["scores"].keys())
         for doc in data_coll
     ])
+    data_coll = [
+        doc
+        for doc in data_coll
+        if set(doc["scores"].keys()) == systems
+    ]
     for doc in data_coll:
         doc["scores"] = {
             system: doc["scores"][system]
@@ -82,11 +92,11 @@ def system_level(data_lang):
 
 results_syslevel = collections.defaultdict(dict)
 results_seglevel = collections.defaultdict(dict)
-for lang in set(line["doc_id"].split("_#_", 1)[0] for line in data):
+for lang in set(line["src_lang"]+line["tgt_lang"] for line in data):
     data_lang = [
         line
         for line in data
-        if line["doc_id"].split("_#_", 1)[0] == lang
+        if line["src_lang"]+line["tgt_lang"] == lang
     ]
     for metric in metrics:
         data_lang_metric = [
@@ -97,27 +107,17 @@ for lang in set(line["doc_id"].split("_#_", 1)[0] for line in data):
         results_seglevel[metric][lang] = segment_level(data_lang_metric)
 
 
-print(json.dumps(results_seglevel))
-print(json.dumps(results_syslevel))
-
-
 results_seglevel = sorted(results_seglevel.items(), key=lambda x: x[0], reverse=True)
 results_syslevel = sorted(results_syslevel.items(), key=lambda x: x[0], reverse=True)
 print("\n\n")
 print("SEGMENT-LEVEL")
 for metric, scores in results_seglevel:
-    avg_score = statistics.mean(scores.values())
-    print(f"{metric:>20}: {avg_score:<5.1%}", end=" | ")
+    avg_score = statistics.mean([x for x in scores.values()])
+    print(f"{metric:>30}: {avg_score:<5.1%}", end=" | ")
     print(" ".join(f"{lang}:{score:<5.1%}" for lang, score in scores.items()))
 
 print("\n\nSYSTEM-LEVEL")
 for metric, scores in results_syslevel:
-    avg_score = statistics.mean(scores.values())
-    print(f"{metric:>20}: {avg_score:<5.1%}", end=" | ")
+    avg_score = statistics.mean([x for x in scores.values()])
+    print(f"{metric:>30}: {avg_score:<5.1%}", end=" | ")
     print(" ".join(f"{lang}:{score:<5.1%}" for lang, score in scores.items()))
-
-
-"""
-scp euler:/cluster/work/sachan/vilem/iwslt26-metrics/data/output/*.jsonl data/output/
-python3 evaluation -i data/wmt25.jsonl -m data/output/wmt25_*.jsonl
-"""
