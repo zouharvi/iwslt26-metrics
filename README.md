@@ -17,7 +17,7 @@ python3 scripts/04-hf_to_jsonl.py # generate data/iwslt26/dev.jsonl
 python3 evaluation -i data/iwslt26/dev.jsonl -m data/output/iwslt26dev_*.jsonl
 ```
 
-The results for baselines (IWSLT26 dev) are:
+The results for textual human transcript baselines (IWSLT26 dev) are:
 ```
 SEGMENT-LEVEL
       iwslt26dev_comet_partial: 11.6% | ende:11.3% enzh:12.0%
