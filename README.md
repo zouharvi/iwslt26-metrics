@@ -38,3 +38,42 @@ python3 scripts/04-hf_to_jsonl.py
 python3 baselines -i data/iwslt26/dev.jsonl -m asr_comet -o data/output/iwslt26dev_comet.jsonl
 python3 baselines -i data/iwslt26/dev.jsonl -m asr_comet_partial -o data/output/iwslt26dev_comet_partial.jsonl
 ```
+
+### End-to-End SpeechQE
+Preprocess: it takes `dev.jsonl` as input and outputs `dev.tsv`
+```bash
+python baselines/speeechqe_preprocess.py 
+```
+Run E2E SpeechQE model.
+Please note that enzh is zero-shot (The `SpeechQE-TowerInstruct-7B-en2de` model is only trained with QE.ende task).
+```bash
+git clone https://github.com/h-j-han/SpeechQE.git
+conda activate speechqe # setup details are in the repo
+cd SpeechQE
+python speechqe/score_speechqe.py \
+    --dataroot=data/iwslt26 \
+    --manifest_files=dev.tsv \
+    --speechqe_model=h-j-han/SpeechQE-TowerInstruct-7B-en2de \
+```
+```
+python3 evaluation -i data/iwslt26/dev.jsonl -m data/output/speechqe.iwslt26dev.jsonl 
+SEGMENT-LEVEL
+                      speechqe: 29.2% | ende:26.6% enzh:31.8%
+
+
+SYSTEM-LEVEL
+                      speechqe: 86.0% | ende:78.6% enzh:93.4%
+```
+
+### Blaser
+```
+python baselines/blaser.py -i dev.jsonl -o data/output/iwslt26dev_blaser_2_0_qe_s2t.jsonl
+```
+```
+SEGMENT-LEVEL
+    iwslt26dev_endezh_blaserre: 24.4% | ende:22.0% enzh:26.8%
+
+
+SYSTEM-LEVEL
+    iwslt26dev_endezh_blaserre: 76.9% | ende:86.0% enzh:67.7%
+```
