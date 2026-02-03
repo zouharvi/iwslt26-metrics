@@ -22,11 +22,15 @@ The results for textual human transcript baselines (IWSLT26 dev) are:
 SEGMENT-LEVEL
       iwslt26dev_comet_partial: 11.6% | ende:11.3% enzh:12.0%
               iwslt26dev_comet: 34.6% | ende:32.6% enzh:36.5%
+           iwslt26dev_speechqe: 29.2% | ende:26.6% enzh:31.8%
+  iwslt26dev_blaser_2_0_qe_s2t: 24.4% | ende:22.0% enzh:26.8%
 
 
 SYSTEM-LEVEL
       iwslt26dev_comet_partial: 56.6% | ende:44.4% enzh:68.7%
               iwslt26dev_comet: 89.4% | ende:86.2% enzh:92.6%
+           iwslt26dev_speechqe: 86.0% | ende:78.6% enzh:93.4%
+  iwslt26dev_blaser_2_0_qe_s2t: 76.9% | ende:86.0% enzh:67.7%
 ```
 
 ## Baselines
@@ -57,23 +61,10 @@ python speechqe/score_speechqe.py \
 ```
 ```
 python3 evaluation -i data/iwslt26/dev.jsonl -m data/output/speechqe.iwslt26dev.jsonl 
-SEGMENT-LEVEL
-                      speechqe: 29.2% | ende:26.6% enzh:31.8%
-
-
-SYSTEM-LEVEL
-                      speechqe: 86.0% | ende:78.6% enzh:93.4%
 ```
 
 ### Blaser
+Using speech to text version of [blaser2.0qe](https://huggingface.co/facebook/blaser-2.0-qe).
 ```
 python baselines/blaser.py -i dev.jsonl -o data/output/iwslt26dev_blaser_2_0_qe_s2t.jsonl
-```
-```
-SEGMENT-LEVEL
-    iwslt26dev_endezh_blaserre: 24.4% | ende:22.0% enzh:26.8%
-
-
-SYSTEM-LEVEL
-    iwslt26dev_endezh_blaserre: 76.9% | ende:86.0% enzh:67.7%
 ```
