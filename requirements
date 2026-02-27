@@ -1,5 +1,5 @@
 ffmpeg-python
 requests
 datasets
-subset2evaluate >= 1.0.14
+subset2evaluate >= 1.0.26
 unbabel-comet
